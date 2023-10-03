@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "827387974113",
+    "project_id": "krok-test-1bcc2",
+    "storage_bucket": "krok-test-1bcc2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:827387974113:android:22f0775572204d2c2682a0",
+        "android_client_info": {
+          "package_name": "com.kroktesttask.krok_test_task"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBHARZ7u358vgADQ_f1Fjq9FB0PwWa1hQQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
