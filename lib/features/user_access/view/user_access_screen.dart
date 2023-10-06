@@ -6,9 +6,12 @@ class UserAccessScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     return BackgroundContainer(
+      
       image: const AssetImage('assets/user_access.jpg'),
       child: SafeArea(
+        
         child: Container(
           padding: const EdgeInsets.only(left: 16, right: 16),
           child: Row(
