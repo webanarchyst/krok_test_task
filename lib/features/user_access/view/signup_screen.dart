@@ -2,25 +2,28 @@ import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:krok_test_task/services/snack_bar.dart';
-import 'package:krok_test_task/widgets/widgets.dart';
+import 'package:krok_test_task/widgets/custom_button.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignUpScreen> createState() => _SignUpScreen();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreen extends State<SignUpScreen> {
   bool isHiddenPassword = true;
   TextEditingController emailTextInputController = TextEditingController();
   TextEditingController passwordTextInputController = TextEditingController();
+  TextEditingController passwordTextRepeatInputController =
+      TextEditingController();
   final formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
     emailTextInputController.dispose();
     passwordTextInputController.dispose();
+    passwordTextRepeatInputController.dispose();
 
     super.dispose();
   }
@@ -31,24 +34,34 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  Future<void> login() async {
+  Future<void> signUp() async {
     final navigator = Navigator.of(context);
 
     final isValid = formKey.currentState!.validate();
     if (!isValid) return;
 
+    if (passwordTextInputController.text !=
+        passwordTextRepeatInputController.text) {
+      SnackBarService.showSnackBar(
+        context,
+        'Passwords must match',
+        true,
+      );
+      return;
+    }
+
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailTextInputController.text.trim(),
         password: passwordTextInputController.text.trim(),
       );
     } on FirebaseAuthException catch (e) {
       print(e.code);
 
-      if (e.code == 'user-not-found' || e.code == 'wrong-password') {
+      if (e.code == 'email-already-in-use') {
         SnackBarService.showSnackBar(
           context,
-          'Incorrect email or password. Repeat the request',
+          'This email is already in use, repeat the request using a second email',
           true,
         );
         return;
@@ -58,11 +71,10 @@ class _LoginScreenState extends State<LoginScreen> {
           'Unknown error! Please try again or contact support.',
           true,
         );
-        return;
       }
     }
 
-    navigator.pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
+    navigator.pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
   }
 
   @override
@@ -82,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 controller: emailTextInputController,
                 validator: (email) =>
                     email != null && !EmailValidator.validate(email)
-                        ? 'Enter correct Email'
+                        ? 'Enter the correct Email'
                         : null,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
@@ -94,9 +106,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 autocorrect: false,
                 controller: passwordTextInputController,
                 obscureText: isHiddenPassword,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 validator: (value) =>
                     value != null && value.length < 6 ? 'min 6 symbols' : null,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
                 decoration: InputDecoration(
                   border: const OutlineInputBorder(),
                   hintText: 'Enter password',
@@ -112,21 +124,38 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 30),
-              CustomButton(buttonText: 'Continue', onTap: login),
+              TextFormField(
+                autocorrect: false,
+                controller: passwordTextRepeatInputController,
+                obscureText: isHiddenPassword,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                validator: (value) =>
+                    value != null && value.length < 6 ? 'min 6 symbols' : null,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  hintText: 'Enter password',
+                  suffix: InkWell(
+                    onTap: togglePasswordView,
+                    child: Icon(
+                      isHiddenPassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 30),
+              CustomButton(buttonText: 'Continue', onTap: signUp),
               const SizedBox(height: 30),
               TextButton(
-                onPressed: () => Navigator.of(context).pushNamed('/register'),
+                onPressed: () => Navigator.of(context).pop(),
                 child: const Text(
-                  'Register',
+                  'Log In',
                   style: TextStyle(
                     decoration: TextDecoration.underline,
                   ),
                 ),
-              ),
-              TextButton(
-                onPressed: () =>
-                    Navigator.of(context).pushNamed('/reset_password'),
-                child: const Text('Reset Password'),
               ),
             ],
           ),
